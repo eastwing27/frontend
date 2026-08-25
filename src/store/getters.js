@@ -56,7 +56,8 @@ const filteredLocationHistoryLatLngs = (state) => {
  * coordinates does not exceed `config.map.maxPointDistance`.
  *
  * @param {State} state
- * @returns {L.LatLng[][]} Groups of coherent coordinates
+ * @returns {{user: User, latLngs: L.LatLng[]}[]} Groups of coherent
+ *   coordinates, tagged with the user they belong to
  */
 const filteredLocationHistoryLatLngGroups = (state) => {
   const groups = [];
@@ -79,14 +80,14 @@ const filteredLocationHistoryLatLngGroups = (state) => {
             config.map.maxPointDistance
           ) {
             // Distance is too far, start new group of coordinate
-            groups.push(latLngs);
+            groups.push({ user, latLngs });
             latLngs = [];
           }
         }
         // Add coordinate to current active group
         latLngs.push(latLng);
       });
-      groups.push(latLngs);
+      groups.push({ user, latLngs });
     });
   });
   return groups;

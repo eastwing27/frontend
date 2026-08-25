@@ -29,8 +29,10 @@
       <LPolyline
         v-for="(group, i) in filteredLocationHistoryLatLngGroups"
         :key="i"
-        :lat-lngs="group"
+        :lat-lngs="group.latLngs"
         v-bind="polyline"
+        :color="map.showUserColors ? getUserColor(group.user) : polyline.color"
+        class-name="ot-track-line"
       />
     </template>
 
@@ -58,6 +60,9 @@
             :key="`${l.topic}-location-${n}`"
             :lat-lng="[l.lat, l.lon]"
             v-bind="circleMarker"
+            :color="
+              map.showUserColors ? getUserColor(user) : circleMarker.color
+            "
           >
             <LDeviceLocationPopup
               :user="user"
@@ -149,6 +154,7 @@ import * as types from "@/store/mutation-types";
 import LCustomMarker from "@/components/LCustomMarker";
 import LHeatmap from "@/components/LHeatmap.vue";
 import LDeviceLocationPopup from "@/components/LDeviceLocationPopup.vue";
+import { colorForIndex } from "@/util";
 
 export default {
   components: {
@@ -192,6 +198,10 @@ export default {
         ...this.$config.map.polyline,
         color: this.$config.map.polyline.color || this.$config.primaryColor,
       },
+      userColorMap: {},
+      // Randomized once per page load, so the palette differs between
+      // reloads while staying stable (and evenly spaced) within a session.
+      colorBaseHue: Math.floor(Math.random() * 360),
     };
   },
   computed: {
@@ -266,6 +276,38 @@ export default {
         face: lastLocation.face,
       }));
     },
+    /**
+     * Get a random color for a user, generating and caching a new one the
+     * first time it's requested. Stable for the lifetime of the page, but
+     * re-randomized on every reload.
+     *
+     * @param {User} user Username
+     * @returns {String} CSS color
+     */
+    getUserColor(user) {
+      if (!this.userColorMap[user]) {
+        const index = Object.keys(this.userColorMap).length;
+        this.$set(
+          this.userColorMap,
+          user,
+          colorForIndex(index, this.colorBaseHue)
+        );
+      }
+      return this.userColorMap[user];
+    },
   },
 };
 </script>
+
+<style>
+/*
+ * Leaflet renders polylines as SVG elements outside of Vue's control, so
+ * this can't be a scoped style. The stacked drop-shadows fake a dark halo
+ * around the track line, keeping it legible against any tile background
+ * regardless of the line's own color.
+ */
+.ot-track-line {
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8))
+    drop-shadow(0 0 1px rgba(0, 0, 0, 0.8));
+}
+</style>

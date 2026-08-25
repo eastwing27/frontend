@@ -94,6 +94,16 @@
           </option>
         </select>
       </div>
+      <div class="nav-item">
+        <label class="show-user-colors-label">
+          <input
+            type="checkbox"
+            :checked="map.showUserColors"
+            @change="setMapShowUserColors($event.target.checked)"
+          />
+          {{ $t("Show users in different colors") }}
+        </label>
+      </div>
       <div v-if="selectedUser" class="nav-item">
         <SmartphoneIcon size="1x" aria-hidden="true" role="img" />
         <select
@@ -346,6 +356,7 @@ export default {
   methods: {
     ...mapMutations({
       setMapLayerVisibility: types.SET_MAP_LAYER_VISIBILITY,
+      setMapShowUserColors: types.SET_MAP_SHOW_USER_COLORS,
     }),
     ...mapActions([
       "setSelectedUser",
@@ -366,6 +377,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.show-user-colors-label {
+  align-items: center;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 0.5em;
+  white-space: nowrap;
+
+  input[type="checkbox"] {
+    margin: 0;
+  }
+}
+
 .distance-travelled {
   text-align: right;
   line-height: 1.2;
