@@ -6,6 +6,7 @@ import {
   isIsoDateTime,
   degreesToRadians,
   distanceBetweenCoordinates,
+  bearingBetweenCoordinates,
   humanReadableDistance,
 } from "@/util";
 
@@ -110,6 +111,38 @@ describe("distanceBetweenCoordinates", () => {
       )
       // 9,102.73km according to Google Maps
     ).toBe(9105627.810109457);
+  });
+});
+
+describe("bearingBetweenCoordinates", () => {
+  test("expected results", () => {
+    // Due north
+    expect(
+      bearingBetweenCoordinates({ lat: 0, lng: 0 }, { lat: 1, lng: 0 })
+    ).toBe(0);
+
+    // Due east
+    expect(
+      bearingBetweenCoordinates({ lat: 0, lng: 0 }, { lat: 0, lng: 1 })
+    ).toBe(90);
+
+    // Due south
+    expect(
+      bearingBetweenCoordinates({ lat: 1, lng: 0 }, { lat: 0, lng: 0 })
+    ).toBe(180);
+
+    // Due west
+    expect(
+      bearingBetweenCoordinates({ lat: 0, lng: 1 }, { lat: 0, lng: 0 })
+    ).toBe(270);
+
+    // The Shard - Victoria Memorial
+    expect(
+      bearingBetweenCoordinates(
+        { lat: 51.5046678, lng: -0.0870769 },
+        { lat: 51.501752, lng: -0.1408258 }
+      )
+    ).toBe(265.04027029201006);
   });
 });
 

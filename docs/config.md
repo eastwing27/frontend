@@ -223,9 +223,11 @@ for all possible values.
 
 ### `map.circleMarker`
 
-Location point marker configuation. `color` defaults to `primaryColor` if `null`. See
-[Vue2Leaflet `l-circle-marker` documentation](https://vue2-leaflet.netlify.app/components/LCircleMarker.html)
-for all possible values.
+Location point marker configuration, used by the location points layer
+(`map.layers.points`). Each point is drawn as an arrow rotated towards its
+direction of movement; `color` sets the arrow's color (defaults to
+`primaryColor` if `null`) and `radius` scales its size. `fillColor` and
+`fillOpacity` are not used.
 
 - Type: [`Object`]
 - Default:
@@ -348,10 +350,11 @@ Initial visibility of the POI layer.
 
 ### `map.layers.points`
 
-Initial visibility of the location points layer.
+Initial visibility of the location points layer. Each point is shown as an
+arrow rotated towards its direction of movement.
 
 - Type: [`Boolean`]
-- Default: `false`
+- Default: `true`
 
 ### `map.maxNativeZoom`
 
@@ -553,7 +556,7 @@ This also includes a calculation of elevation gain / loss.
 Initial start date and time (browser timezone) for fetched data.
 
 - Type: [`Date`]
-- Default: one month ago, 00:00:00
+- Default: today, 00:00:00
 - Example:
   ```js
   // Data will be fetched from the first day of the current month

@@ -65,6 +65,28 @@ export const distanceBetweenCoordinates = (c1, c2) => {
 };
 
 /**
+ * Calculate the initial bearing (forward azimuth) from one coordinate to
+ * another.
+ *
+ * https://www.movable-type.co.uk/scripts/latlong.html#bearing
+ *
+ * @param {Coordinate} c1 Starting coordinate
+ * @param {Coordinate} c2 Destination coordinate
+ * @returns {Number} Bearing in degrees, where 0 is north, going clockwise
+ */
+export const bearingBetweenCoordinates = (c1, c2) => {
+  const phi1 = degreesToRadians(c1.lat);
+  const phi2 = degreesToRadians(c2.lat);
+  const deltaLambda = degreesToRadians(c2.lng - c1.lng);
+  const y = Math.sin(deltaLambda) * Math.cos(phi2);
+  const x =
+    Math.cos(phi1) * Math.sin(phi2) -
+    Math.sin(phi1) * Math.cos(phi2) * Math.cos(deltaLambda);
+  const theta = Math.atan2(y, x);
+  return ((theta * 180) / Math.PI + 360) % 360;
+};
+
+/**
  * Format a distance in meters into a human-readable string with unit.
  *
  * This only supports m / km for now, but could read a config option and return
@@ -98,3 +120,24 @@ export const getLocationHistoryCount = (locationHistory) =>
         .reduce((a, b) => a + b, 0)
     )
     .reduce((a, b) => a + b, 0);
+
+// Successive hues this far apart stay visually distinct from each other
+// no matter how many are generated, since the angle is irrational relative
+// to 360 degrees and so never re-aligns with earlier hues.
+const GOLDEN_ANGLE = 137.508;
+
+/**
+ * Generate a color in HSL format for the given index, spacing hues out by
+ * the golden angle so consecutive indexes stay visually distinct from each
+ * other. Saturation and lightness are fixed at values that stay legible on
+ * top of map tiles.
+ *
+ * @param {Number} index Zero-based index of the color to generate
+ * @param {Number} [baseHue] Hue offset in degrees, e.g. randomized once per
+ *   page load so the resulting palette isn't the same every time
+ * @returns {String} CSS color, e.g. "hsl(200, 65%, 45%)"
+ */
+export const colorForIndex = (index, baseHue = 0) => {
+  const hue = Math.round((baseHue + index * GOLDEN_ANGLE) % 360);
+  return `hsl(${hue}, 65%, 45%)`;
+};

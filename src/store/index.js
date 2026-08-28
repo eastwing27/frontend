@@ -29,6 +29,7 @@ export default new Vuex.Store({
       },
       zoom: 19,
       layers: config.map.layers,
+      showUserColors: true,
     },
     distanceTravelled: 0,
     elevationGain: 0,
