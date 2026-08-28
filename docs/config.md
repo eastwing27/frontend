@@ -556,7 +556,7 @@ This also includes a calculation of elevation gain / loss.
 Initial start date and time (browser timezone) for fetched data.
 
 - Type: [`Date`]
-- Default: one month ago, 00:00:00
+- Default: today, 00:00:00
 - Example:
   ```js
   // Data will be fetched from the first day of the current month

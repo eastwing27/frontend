@@ -4,7 +4,6 @@ const endDateTime = new Date();
 endDateTime.setHours(23, 59, 59, 0);
 
 const startDateTime = new Date(endDateTime);
-startDateTime.setMonth(startDateTime.getMonth() - 1);
 startDateTime.setHours(0, 0, 0, 0);
 
 const DEFAULT_CONFIG = {
