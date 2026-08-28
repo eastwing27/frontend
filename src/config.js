@@ -56,7 +56,7 @@ const DEFAULT_CONFIG = {
       last: true,
       line: true,
       poi: true,
-      points: false,
+      points: true,
     },
     maxNativeZoom: 19,
     maxPointDistance: null,
