@@ -55,13 +55,15 @@
               {{ l.poi }}
             </LTooltip>
           </LCircleMarker>
-          <LCircleMarker
+          <LMarker
             v-if="map.layers.points"
             :key="`${l.topic}-location-${n}`"
             :lat-lng="[l.lat, l.lon]"
-            v-bind="circleMarker"
-            :color="
-              map.showUserColors ? getUserColor(user) : circleMarker.color
+            :icon="
+              trackArrowIcon(
+                l.bearing,
+                map.showUserColors ? getUserColor(user) : circleMarker.color
+              )
             "
           >
             <LDeviceLocationPopup
@@ -81,7 +83,7 @@
               :wifi="{ ssid: l.SSID, bssid: l.BSSID }"
               :address="l.addr"
             ></LDeviceLocationPopup>
-          </LCircleMarker>
+          </LMarker>
         </template>
       </template>
     </template>
@@ -152,9 +154,10 @@ import {
 import "leaflet/dist/leaflet.css";
 import * as types from "@/store/mutation-types";
 import LCustomMarker from "@/components/LCustomMarker";
+import trackArrowIcon from "@/components/LTrackArrowIcon";
 import LHeatmap from "@/components/LHeatmap.vue";
 import LDeviceLocationPopup from "@/components/LDeviceLocationPopup.vue";
-import { colorForIndex } from "@/util";
+import { bearingBetweenCoordinates, colorForIndex } from "@/util";
 
 export default {
   components: {
@@ -256,7 +259,9 @@ export default {
     /**
      * Find a the last location object for a user/device combination from the
      * local cache and backfill name and face attributes to each item from the
-     * passed array of location objects.
+     * passed array of location objects. Also compute the bearing (direction
+     * of movement) of each point towards the next point in time, falling
+     * back to the bearing from the previous point for the last one.
      *
      * @param {User} user Username
      * @param {Device} device Device name
@@ -267,14 +272,28 @@ export default {
       const lastLocation = this.lastLocations.find(
         (l) => l.username === user && l.device === device
       );
-      if (!lastLocation) {
-        return deviceLocations;
-      }
-      return deviceLocations.map((l) => ({
-        ...l,
-        name: lastLocation.name,
-        face: lastLocation.face,
-      }));
+      return deviceLocations.map((l, i) => {
+        const next = deviceLocations[i + 1];
+        const previous = deviceLocations[i - 1];
+        let bearing = 0;
+        if (next) {
+          bearing = bearingBetweenCoordinates(
+            L.latLng(l.lat, l.lon),
+            L.latLng(next.lat, next.lon)
+          );
+        } else if (previous) {
+          bearing = bearingBetweenCoordinates(
+            L.latLng(previous.lat, previous.lon),
+            L.latLng(l.lat, l.lon)
+          );
+        }
+        return {
+          ...l,
+          name: lastLocation ? lastLocation.name : l.name,
+          face: lastLocation ? lastLocation.face : l.face,
+          bearing,
+        };
+      });
     },
     /**
      * Get a random color for a user, generating and caching a new one the
@@ -294,6 +313,17 @@ export default {
         );
       }
       return this.userColorMap[user];
+    },
+    /**
+     * Build a divIcon for a location history point, shaped as an arrow
+     * rotated towards its direction of movement.
+     *
+     * @param {Number} bearing Bearing in degrees, where 0 is north
+     * @param {String} color CSS color for the arrow
+     * @returns {L.DivIcon} Leaflet icon
+     */
+    trackArrowIcon(bearing, color) {
+      return trackArrowIcon(bearing, color, this.circleMarker.radius * 3);
     },
   },
 };

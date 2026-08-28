@@ -65,6 +65,28 @@ export const distanceBetweenCoordinates = (c1, c2) => {
 };
 
 /**
+ * Calculate the initial bearing (forward azimuth) from one coordinate to
+ * another.
+ *
+ * https://www.movable-type.co.uk/scripts/latlong.html#bearing
+ *
+ * @param {Coordinate} c1 Starting coordinate
+ * @param {Coordinate} c2 Destination coordinate
+ * @returns {Number} Bearing in degrees, where 0 is north, going clockwise
+ */
+export const bearingBetweenCoordinates = (c1, c2) => {
+  const phi1 = degreesToRadians(c1.lat);
+  const phi2 = degreesToRadians(c2.lat);
+  const deltaLambda = degreesToRadians(c2.lng - c1.lng);
+  const y = Math.sin(deltaLambda) * Math.cos(phi2);
+  const x =
+    Math.cos(phi1) * Math.sin(phi2) -
+    Math.sin(phi1) * Math.cos(phi2) * Math.cos(deltaLambda);
+  const theta = Math.atan2(y, x);
+  return ((theta * 180) / Math.PI + 360) % 360;
+};
+
+/**
  * Format a distance in meters into a human-readable string with unit.
  *
  * This only supports m / km for now, but could read a config option and return

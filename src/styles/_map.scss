@@ -87,5 +87,20 @@
         }
       }
     }
+
+    .ot-track-arrow {
+      display: block;
+      position: relative;
+      filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8));
+
+      svg {
+        height: 100%;
+        width: 100%;
+
+        path {
+          fill: currentColor;
+        }
+      }
+    }
   }
 }
